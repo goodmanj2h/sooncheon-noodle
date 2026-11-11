@@ -1,0 +1,17 @@
+# 환경변수 및 보안 키 파일 (절대 깃허브 등에 업로드 금지)
+.env
+.env.local
+
+# 맥 OS 시스템 임시 파일
+.DS_Store
+
+# 파이썬 캐시 파일
+__pycache__/
+*.pyc
+
+# 가상환경
+venv/
+.venv/
+
+# 임시 데이터 파일
+data/temp/
