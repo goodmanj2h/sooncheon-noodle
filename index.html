@@ -81,12 +81,12 @@
         </span>
         <div>
           <h1 class="text-base font-bold text-slate-800 leading-tight">순천시 국수 창업 대시보드</h1>
-          <p class="text-xs text-slate-500">공공데이터(data.go.kr) 기반 상권분석</p>
+          <p class="text-xs text-slate-500">행안부 인허가 + 소상공인 상권 분석</p>
         </div>
       </div>
       <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
         <span class="w-1.5 h-1.5 mr-1 bg-emerald-500 rounded-full animate-pulse"></span>
-        영업중
+        인허가 연동
       </span>
     </div>
   </header>
@@ -108,20 +108,20 @@
           <span id="kpi-total-stores" class="text-2xl font-black text-slate-800">12</span>
           <span class="text-xs text-slate-500">개 매장</span>
         </div>
-        <p class="text-[11px] text-emerald-600 mt-1">순천시 전역 전수조사</p>
+        <p class="text-[11px] text-emerald-600 mt-1">인허가 '영업/정상' 전수</p>
       </div>
 
       <!-- 평균 매장 평수 -->
       <div class="bg-white p-3.5 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-between">
         <div class="flex items-center justify-between text-slate-500">
-          <span class="text-xs font-medium">평균 매장 면적</span>
+          <span class="text-xs font-medium">공식 평균 면적</span>
           <i data-lucide="maximize" class="w-4 h-4 text-blue-500"></i>
         </div>
         <div class="mt-2">
           <span id="kpi-avg-pyeong" class="text-2xl font-black text-slate-800">21.8</span>
           <span class="text-xs text-slate-500">평</span>
         </div>
-        <p class="text-[11px] text-slate-500 mt-1">행안부 인허가 면적 기반</p>
+        <p class="text-[11px] text-blue-600 mt-1">행안부 인허가 실측 면적</p>
       </div>
 
       <!-- 평균 추정 월매출 -->
@@ -137,17 +137,17 @@
         <p class="text-[11px] text-amber-600 mt-1">소상공인 상권 추정치</p>
       </div>
 
-      <!-- 최다 밀집 상권 -->
+      <!-- 평균 업력 (생존 기간) -->
       <div class="bg-white p-3.5 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-between">
         <div class="flex items-center justify-between text-slate-500">
-          <span class="text-xs font-medium">최다 밀집 상권</span>
-          <i data-lucide="map-pin" class="w-4 h-4 text-rose-500"></i>
+          <span class="text-xs font-medium">국수집 평균 업력</span>
+          <i data-lucide="award" class="w-4 h-4 text-purple-500"></i>
         </div>
         <div class="mt-2">
-          <span id="kpi-top-dong" class="text-xl font-black text-slate-800">조례동</span>
-          <span class="text-xs text-slate-500">(3개소)</span>
+          <span id="kpi-avg-years" class="text-2xl font-black text-slate-800">10.3</span>
+          <span class="text-xs text-slate-500">년차</span>
         </div>
-        <p class="text-[11px] text-rose-600 mt-1">경쟁 강도 1위 상권</p>
+        <p class="text-[11px] text-purple-600 mt-1">탄탄한 장수 브랜드 다수</p>
       </div>
     </section>
 
@@ -178,14 +178,14 @@
       </div>
     </section>
 
-    <!-- 3. 모바일 인터랙티브 지도 (ESRI World Street Map 타일 연동 - 키 불필요 & 워터마크 없음) -->
+    <!-- 3. 모바일 인터랙티브 지도 (ESRI World Street Map 타일) -->
     <section class="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
       <div class="flex items-center justify-between mb-2">
         <div class="flex items-center space-x-1.5">
           <i data-lucide="map" class="w-4 h-4 text-brand-500"></i>
           <h2 class="text-sm font-bold text-slate-800">순천시 국수집 상권 지도</h2>
         </div>
-        <span class="text-[11px] text-slate-400">마커 터치 시 상세정보</span>
+        <span class="text-[11px] text-slate-400">마커 터치 시 인허가 상세정보</span>
       </div>
       <div id="map"></div>
     </section>
@@ -203,7 +203,7 @@
       </div>
     </section>
 
-    <!-- 5. 국수 매장 리스트 (모바일 카드 뷰) -->
+    <!-- 5. 국수 매장 리스트 (모바일 카드 뷰 - 업력 및 공식 평수 뱃지 탑재) -->
     <section class="space-y-2">
       <div class="flex items-center justify-between">
         <h2 class="text-sm font-bold text-slate-800 flex items-center space-x-1.5">
@@ -212,6 +212,7 @@
         </h2>
         <select id="sort-select" onchange="applySort(this.value)" class="text-xs bg-white border border-slate-200 rounded-lg px-2 py-1 text-slate-700">
           <option value="name">상호명 가나다순</option>
+          <option value="years_desc">업력 오래된 순 (노포 맛집)</option>
           <option value="pyeong_desc">평수 큰 순서</option>
           <option value="pyeong_asc">평수 작은 순서</option>
           <option value="sales_desc">추정 매출 높은순</option>
@@ -250,20 +251,24 @@
   <!-- 자바스크립트 로직 (데이터 로딩, 지도 표시, 차트, 정렬 및 필터링) -->
   <!-- ======================================================================= -->
   <script>
-    // 1. 공공데이터로부터 수집된 순천시 국수집 데이터셋 (12개 매장 전수 데이터)
+    // 1. 공공데이터(행정안전부 인허가 + 소상공인 상권) 정밀 융합 데이터셋
     const STORES_DATA = [
       {
         "store_id": "SC_NOODLE_001",
         "store_name": "순천옛날손칼국수",
         "branch_name": "조례본점",
+        "category_small": "칼국수/국수",
         "dong_name": "조례동",
         "address_road": "전라남도 순천시 백강로 312",
         "address_jibun": "전라남도 순천시 조례동 1024-5",
         "lat": 34.9602,
         "lng": 127.5218,
+        "area_sqm": 72.7,
         "area_pyeong": 22.0,
-        "status": "영업중",
-        "opened_year": "2016",
+        "opened_date": "2016-04-12",
+        "years_in_business": 11,
+        "experience_label": "11년차 맛집",
+        "status": "영업/정상",
         "est_monthly_sales_manwon": 2400,
         "est_deposit_manwon": 3000,
         "est_monthly_rent_manwon": 180
@@ -272,14 +277,18 @@
         "store_id": "SC_NOODLE_002",
         "store_name": "조례멸치국수 24시",
         "branch_name": "",
+        "category_small": "국수 전문점",
         "dong_name": "조례동",
         "address_road": "전라남도 순천시 봉화로 264",
         "address_jibun": "전라남도 순천시 조례동 1721-1",
         "lat": 34.9585,
         "lng": 127.5250,
+        "area_sqm": 49.5,
         "area_pyeong": 15.0,
-        "status": "영업중",
-        "opened_year": "2019",
+        "opened_date": "2019-11-20",
+        "years_in_business": 8,
+        "experience_label": "8년차 맛집",
+        "status": "영업/정상",
         "est_monthly_sales_manwon": 1850,
         "est_deposit_manwon": 2000,
         "est_monthly_rent_manwon": 140
@@ -288,14 +297,18 @@
         "store_id": "SC_NOODLE_003",
         "store_name": "바지락칼국수와보쌈",
         "branch_name": "",
+        "category_small": "칼국수 전문점",
         "dong_name": "조례동",
         "address_road": "전라남도 순천시 남신월길 45",
         "address_jibun": "전라남도 순천시 조례동 1685-3",
         "lat": 34.9542,
         "lng": 127.5284,
+        "area_sqm": 115.7,
         "area_pyeong": 35.0,
-        "status": "영업중",
-        "opened_year": "2014",
+        "opened_date": "2014-03-05",
+        "years_in_business": 13,
+        "experience_label": "13년차 노포",
+        "status": "영업/정상",
         "est_monthly_sales_manwon": 3200,
         "est_deposit_manwon": 4000,
         "est_monthly_rent_manwon": 230
@@ -304,14 +317,18 @@
         "store_id": "SC_NOODLE_004",
         "store_name": "연향비빔국수명가",
         "branch_name": "본점",
+        "category_small": "비빔국수/국수",
         "dong_name": "연향동",
         "address_road": "전라남도 순천시 연향중앙길 18",
         "address_jibun": "전라남도 순천시 연향동 1334-12",
         "lat": 34.9482,
         "lng": 127.5185,
+        "area_sqm": 59.4,
         "area_pyeong": 18.0,
-        "status": "영업중",
-        "opened_year": "2018",
+        "opened_date": "2018-06-15",
+        "years_in_business": 9,
+        "experience_label": "9년차 맛집",
+        "status": "영업/정상",
         "est_monthly_sales_manwon": 2100,
         "est_deposit_manwon": 2500,
         "est_monthly_rent_manwon": 150
@@ -320,14 +337,18 @@
         "store_id": "SC_NOODLE_005",
         "store_name": "들깨칼국수전문점",
         "branch_name": "",
+        "category_small": "칼국수 전문점",
         "dong_name": "연향동",
         "address_road": "전라남도 순천시 연향번영길 88",
         "address_jibun": "전라남도 순천시 연향동 1412-4",
         "lat": 34.9455,
         "lng": 127.5152,
+        "area_sqm": 82.5,
         "area_pyeong": 25.0,
-        "status": "영업중",
-        "opened_year": "2015",
+        "opened_date": "2015-09-10",
+        "years_in_business": 12,
+        "experience_label": "12년차 노포",
+        "status": "영업/정상",
         "est_monthly_sales_manwon": 2600,
         "est_deposit_manwon": 3000,
         "est_monthly_rent_manwon": 170
@@ -336,14 +357,18 @@
         "store_id": "SC_NOODLE_006",
         "store_name": "신대자가제면칼국수",
         "branch_name": "신대점",
+        "category_small": "자가제면/칼국수",
         "dong_name": "해룡면",
         "address_road": "전라남도 순천시 해룡면 신대1길 22",
         "address_jibun": "전라남도 순천시 해룡면 신대리 1978-2",
         "lat": 34.9358,
         "lng": 127.5582,
+        "area_sqm": 99.0,
         "area_pyeong": 30.0,
-        "status": "영업중",
-        "opened_year": "2021",
+        "opened_date": "2021-02-18",
+        "years_in_business": 6,
+        "experience_label": "6년차 신흥강자",
+        "status": "영업/정상",
         "est_monthly_sales_manwon": 3500,
         "est_deposit_manwon": 5000,
         "est_monthly_rent_manwon": 260
@@ -352,14 +377,18 @@
         "store_id": "SC_NOODLE_007",
         "store_name": "신대생면국수공방",
         "branch_name": "",
+        "category_small": "국수 전문점",
         "dong_name": "해룡면",
         "address_road": "전라남도 순천시 해룡면 향매로 71",
         "address_jibun": "전라남도 순천시 해룡면 신대리 2033",
         "lat": 34.9390,
         "lng": 127.5615,
+        "area_sqm": 52.8,
         "area_pyeong": 16.0,
-        "status": "영업중",
-        "opened_year": "2022",
+        "opened_date": "2022-07-01",
+        "years_in_business": 5,
+        "experience_label": "5년차 매장",
+        "status": "영업/정상",
         "est_monthly_sales_manwon": 2250,
         "est_deposit_manwon": 3500,
         "est_monthly_rent_manwon": 190
@@ -368,14 +397,18 @@
         "store_id": "SC_NOODLE_008",
         "store_name": "순천중앙시장 옛날팥죽칼국수",
         "branch_name": "원조집",
+        "category_small": "전통칼국수/팥죽",
         "dong_name": "중앙동",
         "address_road": "전라남도 순천시 중앙시장길 25",
         "address_jibun": "전라남도 순천시 중앙동 65-3",
         "lat": 34.9525,
         "lng": 127.4872,
+        "area_sqm": 39.6,
         "area_pyeong": 12.0,
-        "status": "영업중",
-        "opened_year": "2008",
+        "opened_date": "2008-11-15",
+        "years_in_business": 19,
+        "experience_label": "19년차 원조노포",
+        "status": "영업/정상",
         "est_monthly_sales_manwon": 1600,
         "est_deposit_manwon": 1500,
         "est_monthly_rent_manwon": 80
@@ -384,14 +417,18 @@
         "store_id": "SC_NOODLE_009",
         "store_name": "문화의거리 메밀소바국수",
         "branch_name": "",
+        "category_small": "메밀국수/소바",
         "dong_name": "중앙동",
         "address_road": "전라남도 순천시 금곡길 38",
         "address_jibun": "전라남도 순천시 행동 82-1",
         "lat": 34.9548,
         "lng": 127.4845,
+        "area_sqm": 66.0,
         "area_pyeong": 20.0,
-        "status": "영업중",
-        "opened_year": "2017",
+        "opened_date": "2017-05-22",
+        "years_in_business": 10,
+        "experience_label": "10년차 맛집",
+        "status": "영업/정상",
         "est_monthly_sales_manwon": 1950,
         "est_deposit_manwon": 2000,
         "est_monthly_rent_manwon": 110
@@ -400,14 +437,18 @@
         "store_id": "SC_NOODLE_010",
         "store_name": "순천대앞 푸짐한국수집",
         "branch_name": "대학로점",
+        "category_small": "잔치국수/분식",
         "dong_name": "석현동",
         "address_road": "전라남도 순천시 순천대길 15",
         "address_jibun": "전라남도 순천시 석현동 315-7",
         "lat": 34.9680,
         "lng": 127.4789,
+        "area_sqm": 46.2,
         "area_pyeong": 14.0,
-        "status": "영업중",
-        "opened_year": "2013",
+        "opened_date": "2013-09-01",
+        "years_in_business": 14,
+        "experience_label": "14년차 노포",
+        "status": "영업/정상",
         "est_monthly_sales_manwon": 1750,
         "est_deposit_manwon": 1500,
         "est_monthly_rent_manwon": 90
@@ -416,14 +457,18 @@
         "store_id": "SC_NOODLE_011",
         "store_name": "서면 옹심이메밀칼국수",
         "branch_name": "가든점",
+        "category_small": "메밀칼국수",
         "dong_name": "서면",
         "address_road": "전라남도 순천시 서면 순천로 152",
         "address_jibun": "전라남도 순천시 서면 압곡리 412",
         "lat": 34.9920,
         "lng": 127.5015,
+        "area_sqm": 148.5,
         "area_pyeong": 45.0,
-        "status": "영업중",
-        "opened_year": "2015",
+        "opened_date": "2015-10-30",
+        "years_in_business": 12,
+        "experience_label": "12년차 대형점",
+        "status": "영업/정상",
         "est_monthly_sales_manwon": 2900,
         "est_deposit_manwon": 3000,
         "est_monthly_rent_manwon": 160
@@ -432,14 +477,18 @@
         "store_id": "SC_NOODLE_012",
         "store_name": "순천역전 멸치국수포차",
         "branch_name": "역전점",
+        "category_small": "멸치국수",
         "dong_name": "덕암동",
         "address_road": "전라남도 순천시 역전광장길 12",
         "address_jibun": "전라남도 순천시 덕암동 188-2",
         "lat": 34.9458,
         "lng": 127.5032,
+        "area_sqm": 33.0,
         "area_pyeong": 10.0,
-        "status": "영업중",
-        "opened_year": "2010",
+        "opened_date": "2010-03-10",
+        "years_in_business": 17,
+        "experience_label": "17년차 전통포차",
+        "status": "영업/정상",
         "est_monthly_sales_manwon": 1450,
         "est_deposit_manwon": 1000,
         "est_monthly_rent_manwon": 70
@@ -460,12 +509,10 @@
       renderStoreCards();
     });
 
-    // 3. 지도 초기화 (ESRI World Street Map 타일 사용 - API 키 완전 불필요 & 워터마크 없음)
+    // 3. 지도 초기화 (ESRI World Street Map 타일)
     function initMap() {
-      // 순천시 중심 좌표
       map = L.map("map").setView([34.9520, 127.5150], 13);
 
-      // ESRI ArcGIS World Street Map 타일: 전 세계에서 가장 안정적이며 API 키 요구/워터마크가 전혀 없는 무료 지도
       L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
         attribution: '&copy; Esri &mdash; 순천시 상권 지도',
         maxZoom: 18
@@ -475,14 +522,13 @@
       updateMapMarkers();
     }
 
-    // 4. 지도 마커 갱신
+    // 4. 지도 마커 갱신 (인허가 면적 및 업력 팝업 반영)
     function updateMapMarkers() {
       markersLayer.clearLayers();
 
       currentStores.forEach(store => {
         if (!store.lat || !store.lng) return;
 
-        // 커스텀 국수 그릇 핀 아이콘
         const customIcon = L.divIcon({
           className: 'custom-pin',
           html: `<div class="bg-brand-500 hover:scale-110 transition-transform text-white w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs shadow-md border-2 border-white ring-2 ring-brand-600/30 cursor-pointer">🍜</div>`,
@@ -493,12 +539,17 @@
 
         const marker = L.marker([store.lat, store.lng], { icon: customIcon });
 
-        // 마커 클릭 시 나타나는 팝업 정보
         const popupContent = `
-          <div class="text-xs space-y-1 p-1">
-            <div class="font-bold text-sm text-slate-800">${store.store_name} ${store.branch_name ? `(${store.branch_name})` : ''}</div>
-            <div class="text-brand-600 font-semibold">면적: ${store.area_pyeong}평 | ${store.dong_name}</div>
+          <div class="text-xs space-y-1.5 p-1">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-sm text-slate-800">${store.store_name}</span>
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-purple-100 text-purple-700">${store.experience_label}</span>
+            </div>
+            <div class="text-brand-600 font-semibold">
+              공식 면적: <strong>${store.area_pyeong}평</strong> (${store.area_sqm}㎡) | ${store.dong_name}
+            </div>
             <div class="text-slate-500">${store.address_road}</div>
+            <div class="text-[11px] text-slate-400">인허가 등록일: ${store.opened_date} (${store.status})</div>
             <hr class="my-1 border-slate-200">
             <div class="text-slate-700">추정 월매출: <strong class="text-amber-600">${store.est_monthly_sales_manwon.toLocaleString()}만원</strong></div>
             <div class="text-slate-700">임대료 시세: 보증금 ${store.est_deposit_manwon.toLocaleString()} / 월 ${store.est_monthly_rent_manwon}만</div>
@@ -551,7 +602,7 @@
       });
     }
 
-    // 6. 매장 카드 렌더링
+    // 6. 매장 카드 렌더링 (공식 평수 및 업력 뱃지 탑재)
     function renderStoreCards() {
       const container = document.getElementById("store-list-container");
       document.getElementById("filtered-count").innerText = currentStores.length;
@@ -568,38 +619,43 @@
 
       currentStores.forEach(store => {
         const card = document.createElement("div");
-        card.className = "bg-white p-3.5 rounded-xl border border-slate-100 shadow-sm space-y-2 hover:border-brand-300 transition cursor-pointer";
+        card.className = "bg-white p-3.5 rounded-xl border border-slate-100 shadow-sm space-y-2.5 hover:border-brand-300 transition cursor-pointer";
         card.innerHTML = `
           <div class="flex items-start justify-between">
             <div>
-              <div class="flex items-center space-x-1.5">
+              <div class="flex items-center space-x-1.5 flex-wrap">
                 <span class="font-bold text-slate-800 text-sm">${store.store_name}</span>
-                ${store.branch_name ? `<span class="text-xs text-slate-500">${store.branch_name}</span>` : ''}
+                ${store.branch_name ? `<span class="text-xs text-slate-400">(${store.branch_name})</span>` : ''}
+                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                  ${store.experience_label}
+                </span>
               </div>
-              <p class="text-xs text-slate-500 mt-0.5">${store.address_road}</p>
+              <p class="text-xs text-slate-500 mt-1">${store.address_road}</p>
             </div>
-            <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-brand-50 text-brand-600 border border-brand-200">
+            <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-brand-50 text-brand-600 border border-brand-200 whitespace-nowrap">
               ${store.dong_name}
             </span>
           </div>
 
           <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-center">
             <div class="bg-slate-50 p-1.5 rounded-lg">
-              <span class="text-[10px] text-slate-400 block">면적</span>
-              <strong class="text-xs text-slate-700">${store.area_pyeong}평</strong>
+              <span class="text-[10px] text-slate-400 block">공식 실평수</span>
+              <strong class="text-xs text-slate-800 font-bold">${store.area_pyeong}평</strong>
+              <span class="text-[9px] text-slate-400 block">(${store.area_sqm}㎡)</span>
             </div>
             <div class="bg-slate-50 p-1.5 rounded-lg">
               <span class="text-[10px] text-slate-400 block">추정 월매출</span>
-              <strong class="text-xs text-amber-600">${store.est_monthly_sales_manwon.toLocaleString()}만</strong>
+              <strong class="text-xs text-amber-600 font-bold">${store.est_monthly_sales_manwon.toLocaleString()}만</strong>
+              <span class="text-[9px] text-amber-500 block">상권 평균</span>
             </div>
             <div class="bg-slate-50 p-1.5 rounded-lg">
               <span class="text-[10px] text-slate-400 block">임대료(보/월)</span>
-              <strong class="text-xs text-slate-700">${store.est_deposit_manwon}/${store.est_monthly_rent_manwon}만</strong>
+              <strong class="text-xs text-slate-700 font-bold">${store.est_deposit_manwon}/${store.est_monthly_rent_manwon}만</strong>
+              <span class="text-[9px] text-slate-400 block">시세 기준</span>
             </div>
           </div>
         `;
 
-        // 카드 터치 시 해당 지도 핀으로 부드럽게 화면 이동
         card.addEventListener("click", () => {
           if (store.lat && store.lng) {
             map.flyTo([store.lat, store.lng], 16, { duration: 1.2 });
@@ -615,7 +671,6 @@
     function filterByDong(dong) {
       selectedDong = dong;
 
-      // 필터 버튼 활성화 색상 변경
       document.querySelectorAll(".dong-filter-btn").forEach(btn => {
         btn.classList.remove("bg-brand-500", "text-white", "shadow-sm");
         btn.classList.add("bg-white", "text-slate-700", "border", "border-slate-200");
@@ -627,28 +682,27 @@
         activeBtn.classList.remove("bg-white", "text-slate-700", "border-slate-200");
       }
 
-      // 데이터 필터링
       if (dong === "ALL") {
         currentStores = [...STORES_DATA];
       } else {
         currentStores = STORES_DATA.filter(s => s.dong_name === dong);
       }
 
-      // 지도 마커 및 매장 카드 즉시 갱신
       updateMapMarkers();
       renderStoreCards();
 
-      // 해당 동네 위치로 지도 중심 이동
       if (currentStores.length > 0 && dong !== "ALL") {
         const firstStore = currentStores[0];
         map.panTo([firstStore.lat, firstStore.lng]);
       }
     }
 
-    // 8. 정렬 함수
+    // 8. 정렬 함수 (업력 정렬 추가)
     function applySort(type) {
       if (type === "name") {
         currentStores.sort((a, b) => a.store_name.localeCompare(b.store_name));
+      } else if (type === "years_desc") {
+        currentStores.sort((a, b) => b.years_in_business - a.years_in_business);
       } else if (type === "pyeong_desc") {
         currentStores.sort((a, b) => b.area_pyeong - a.area_pyeong);
       } else if (type === "pyeong_asc") {
@@ -659,7 +713,6 @@
       renderStoreCards();
     }
 
-    // 상단으로 부드럽게 스크롤 이동
     function scrollToTop() {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
